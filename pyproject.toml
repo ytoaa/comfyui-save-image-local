@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-save-image-local"
+description = "ComfyUI custom node for directly downloading generated images to your local PC with customizable filenames and formats (PNG/JPEG)."
+version = "1.0.0"
+license = {file = "LICENSE"}
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/yhayano-ponotech/comfyui-save-image-local"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "yas-ponotech"
+DisplayName = "ComfyUI Local Save Node"
+Icon = ""
