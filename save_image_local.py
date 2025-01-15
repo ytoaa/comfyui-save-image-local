@@ -33,16 +33,16 @@ class SaveImageLocal:
         # Create progress bar for better user feedback
         pbar = comfy.utils.ProgressBar(images.shape[0])
         
-        for i, image in enumerate(images):
+        for index in range(images.shape[0]):
             # Convert to PNG format
-            i = 255. * image.cpu().numpy()
-            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+            img_array = 255. * images[index].cpu().numpy()
+            img = Image.fromarray(np.clip(img_array, 0, 255).astype(np.uint8))
             
             # Generate unique filename
-            filename = f"{filename_prefix}_{timestamp}_{i:03d}.png"
+            filename = f"{filename_prefix}_{timestamp}_{index:03d}.png"
             
-            # Update progress bar with the current image and filename
-            pbar.update_absolute(i, images.shape[0], ("PNG", img, filename))
+            # Update progress bar with current image and filename
+            pbar.update_absolute(index, images.shape[0], ("PNG", img, filename))
         
         return {"ui": {"images": results}}
 
