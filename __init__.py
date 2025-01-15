@@ -1,4 +1,13 @@
-from .save_image_local import NODE_CLASS_MAPPINGS
-from .save_image_local import NODE_DISPLAY_NAME_MAPPINGS
+from .local_save_node import LocalSaveNode
 
-__all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
+NODE_CLASS_MAPPINGS = {
+    "Local Save": LocalSaveNode
+}
+
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "Local Save": "Local Save Image"
+}
+
+WEB_DIRECTORY = "./js"
+
+__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
