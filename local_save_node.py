@@ -1,7 +1,8 @@
-import os
 import torch
-from PIL import Image
 import numpy as np
+from PIL import Image
+import base64
+from io import BytesIO
 from datetime import datetime
 from server import PromptServer
 
@@ -11,25 +12,20 @@ class LocalSaveNode:
         return {
             "required": {
                 "images": ("IMAGE",),
-                "save_path": ("STRING", {"default": "C:/ComfyUI/outputs"}),
                 "filename_pattern": ("STRING", {"default": "generated_{date}_{index}"}),
                 "file_format": (["PNG", "JPEG"], {"default": "PNG"}),
             }
         }
     
     RETURN_TYPES = ("IMAGE",)
-    FUNCTION = "save_images"
+    FUNCTION = "process_images"
     CATEGORY = "image"
     OUTPUT_NODE = True
 
-    def save_images(self, images, save_path, filename_pattern, file_format):
-        results = []
+    def process_images(self, images, filename_pattern, file_format):
         try:
-            # 保存先ディレクトリの作成（存在しない場合）
-            os.makedirs(save_path, exist_ok=True)
-            
-            # 現在の日時を取得
             current_date = datetime.now().strftime("%Y%m%d_%H%M%S")
+            image_data_list = []
             
             # バッチ内の各画像を処理
             for i, image in enumerate(images):
@@ -42,29 +38,32 @@ class LocalSaveNode:
                     date=current_date,
                     index=str(i).zfill(3)
                 )
+                full_filename = f"{filename}.{file_format.lower()}"
                 
-                # ファイル拡張子の設定
-                ext = file_format.lower()
-                full_path = os.path.join(save_path, f"{filename}.{ext}")
-                
-                # 画像の保存
+                # 画像をbase64エンコード
+                buffered = BytesIO()
                 if file_format == "PNG":
-                    img.save(full_path, format="PNG")
+                    img.save(buffered, format="PNG")
                 else:
-                    img.save(full_path, format="JPEG", quality=95)
+                    img.save(buffered, format="JPEG", quality=95)
+                img_str = base64.b64encode(buffered.getvalue()).decode()
                 
-                results.append(full_path)
+                # データをリストに追加
+                image_data_list.append({
+                    "filename": full_filename,
+                    "data": img_str,
+                    "format": file_format.lower()
+                })
             
-            # 保存完了メッセージの送信
-            PromptServer.instance.send_sync("local_save_complete", {
-                "message": f"Images saved successfully at: {save_path}",
-                "paths": results
+            # クライアントにデータを送信
+            PromptServer.instance.send_sync("local_save_data", {
+                "images": image_data_list
             })
             
             return (images,)
             
         except Exception as e:
-            error_msg = f"Error saving images: {str(e)}"
+            error_msg = f"Error processing images: {str(e)}"
             PromptServer.instance.send_sync("local_save_error", {
                 "message": error_msg
             })
