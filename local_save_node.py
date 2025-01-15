@@ -12,7 +12,7 @@ class LocalSaveNode:
         return {
             "required": {
                 "images": ("IMAGE",),
-                "filename_pattern": ("STRING", {"default": "generated_{date}_{index}"}),
+                "prefix": ("STRING", {"default": "generated"}),
                 "file_format": (["PNG", "JPEG"], {"default": "PNG"}),
             }
         }
@@ -22,22 +22,20 @@ class LocalSaveNode:
     CATEGORY = "image"
     OUTPUT_NODE = True
 
-    def process_images(self, images, filename_pattern, file_format):
+    def process_images(self, images, prefix, file_format):
         try:
-            current_date = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             image_data_list = []
             
             # バッチ内の各画像を処理
-            for i, image in enumerate(images):
+            for i in range(len(images)):
                 # 画像データの変換
-                i = 255. * image.cpu().numpy()
-                img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+                img_tensor = images[i]
+                img_numpy = 255. * img_tensor.cpu().numpy()
+                img = Image.fromarray(np.clip(img_numpy, 0, 255).astype(np.uint8))
                 
-                # ファイル名の生成
-                filename = filename_pattern.format(
-                    date=current_date,
-                    index=str(i).zfill(3)
-                )
+                # シンプルなファイル名の生成
+                filename = f"{prefix}_{timestamp}_{i+1:03d}"
                 full_filename = f"{filename}.{file_format.lower()}"
                 
                 # 画像をbase64エンコード
