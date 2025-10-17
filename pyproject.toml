@@ -1,9 +1,11 @@
 [project]
 name = "comfyui-save-image-local"
-description = "ComfyUI custom node for directly downloading generated images to your local PC with customizable filenames and formats (PNG/JPEG)."
-version = "1.0.0"
+description = "ComfyUI custom node for directly downloading generated images to your local PC with customizable filenames, formats (PNG/JPEG/WebP), EXIF metadata, and advanced compression settings."
+version = "2.0.0"
 license = {file = "LICENSE"}
-dependencies = []
+dependencies = [
+    "piexif>=1.1.3"
+]
 
 [project.urls]
 Repository = "https://github.com/yhayano-ponotech/comfyui-save-image-local"
